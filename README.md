@@ -24,9 +24,11 @@ Mimic whatsapp look and feel
 ## Feature Workflow
 * Input user story
 * Generate a plan
-* Iterate on plan
-* Generate unit tests for planned feature
-* Generate integration tests for planned fature
+* User action: Ask me questions if anything is not clear
+* User action: give feedback on the plan in a loop
+* Solidify on the final plan
+* Generate unit tests for the plan
+* Generate integration tests for the plan
 * Generate feature based on plan output
 * Update swagger documentation on API creates/updates
 * Run unit tests
