@@ -23,8 +23,8 @@ We would like to build full stack features across those two repositories.  We wo
 * Input user story
 * Generate a plan
 * Iterate on plan
+* Generate unit tests for planned feature
+* Generate integration tests for planned fature
 * Generate feature based on plan output
-* Create unit tests
 * Run unit tests
-* Create integration test
 * Run integration tests
