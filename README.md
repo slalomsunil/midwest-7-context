@@ -18,3 +18,13 @@ We would like to build full stack features across those two repositories.  We wo
 ## What we are not doing
 * No User authentication with passwords.  If you "login" with your username, that is enough to get you in.  If you are not recorgnized, then a profile is created for you
 * No persistent data store.  Use an in-memory database instead.
+
+## Feature Workflow
+* Input user story
+* Generate a plan
+* Iterate on plan
+* Generate feature based on plan output
+* Create unit tests
+* Run unit tests
+* Create integration test
+* Run integration tests
