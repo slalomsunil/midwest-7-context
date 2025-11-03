@@ -23,9 +23,8 @@ Mimic whatsapp look and feel
 
 ## Feature Workflow
 * Input user story
-* Generate a plan
-* User action: Ask me questions if anything is not clear
-* User action: give feedback on the plan in a loop
+* Generate a plan.  Ask me questions if anything is not clear or you need more context or detail
+* Give feedback on the plan in a loop
 * Solidify on the final plan
 * Generate unit tests for the plan
 * Generate integration tests for the plan
