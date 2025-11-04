@@ -2,71 +2,130 @@
 
 ## React Development Standards (UI Repository)
 
-### Component Patterns
+### Chat Component Patterns
 ```javascript
-// Functional components with hooks (preferred)
-import React, { useState, useEffect } from 'react';
+// WhatsApp-style chat interface components
+import React, { useState, useEffect, useRef } from 'react';
 
-const UserProfile = ({ userId }) => {
-  const [user, setUser] = useState(null);
+const ChatInterface = ({ conversationId, currentUser }) => {
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [selectedTone, setSelectedTone] = useState('normal');
   const [loading, setLoading] = useState(true);
+  const messagesEndRef = useRef(null);
   
   useEffect(() => {
-    fetchUser(userId).then(setUser).finally(() => setLoading(false));
-  }, [userId]);
+    fetchMessages(conversationId).then(setMessages).finally(() => setLoading(false));
+    // WebSocket connection for real-time messages
+    const ws = connectToChat(conversationId, (message) => {
+      setMessages(prev => [...prev, message]);
+    });
+    
+    return () => ws.disconnect();
+  }, [conversationId]);
 
-  if (loading) return <LoadingSpinner />;
-  if (!user) return <NotFound />;
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(scrollToBottom, [messages]);
+
+  if (loading) return <ChatSkeleton />;
   
   return (
-    <div className="user-profile">
-      <h1>{user.username}</h1>
-      {/* Component content */}
+    <div className="chat-interface whatsapp-style">
+      <div className="messages-container">
+        {messages.map(message => (
+          <MessageBubble 
+            key={message.id} 
+            message={message} 
+            isOwn={message.senderId === currentUser.id}
+            showToneIndicator={message.transformedTone}
+          />
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+      <MessageInput 
+        value={newMessage}
+        onChange={setNewMessage}
+        selectedTone={selectedTone}
+        onToneChange={setSelectedTone}
+        onSend={handleSendMessage}
+      />
     </div>
   );
 };
 ```
 
-### State Management Patterns
+### Chat State Management Patterns
 ```javascript
-// React Context for global state
-const AuthContext = createContext();
+// Chat Context for global chat state
+const ChatContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+export const ChatProvider = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [conversations, setConversations] = useState([]);
+  const [activeConversation, setActiveConversation] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
   
-  const login = async (credentials) => {
-    const response = await authAPI.login(credentials);
-    setUser(response.user);
-    setIsAuthenticated(true);
-    localStorage.setItem('token', response.token);
+  const loginWithUsername = async (username) => {
+    const response = await chatAPI.loginOrCreate(username);
+    setCurrentUser(response.user);
+    localStorage.setItem('username', username);
+    return response.user;
+  };
+  
+  const sendMessage = async (conversationId, content, tone = 'normal') => {
+    const message = await chatAPI.sendMessage({
+      conversationId,
+      content,
+      tone,
+      senderId: currentUser.id
+    });
+    
+    // Optimistic update
+    setConversations(prev => prev.map(conv => 
+      conv.id === conversationId 
+        ? { ...conv, messages: [...conv.messages, message] }
+        : conv
+    ));
+    
+    return message;
   };
   
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login }}>
+    <ChatContext.Provider value={{ 
+      currentUser, 
+      conversations, 
+      activeConversation,
+      isConnected,
+      loginWithUsername,
+      sendMessage,
+      setActiveConversation
+    }}>
       {children}
-    </AuthContext.Provider>
+    </ChatContext.Provider>
   );
 };
 
-// Custom hook for using auth context
-export const useAuth = () => {
-  const context = useContext(AuthContext);
+// Custom hook for using chat context
+export const useChat = () => {
+  const context = useContext(ChatContext);
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    throw new Error('useChat must be used within ChatProvider');
   }
   return context;
 };
 ```
 
-### API Integration Patterns
+### Chat API Integration Patterns
 ```javascript
-// API client with consistent error handling
-class APIClient {
+// Chat API client with WebSocket support
+class ChatAPIClient {
   constructor(baseURL) {
     this.baseURL = baseURL;
-    this.token = localStorage.getItem('token');
+    this.username = localStorage.getItem('username');
+    this.ws = null;
   }
   
   async request(endpoint, options = {}) {
@@ -74,7 +133,7 @@ class APIClient {
     const config = {
       headers: {
         'Content-Type': 'application/json',
-        ...(this.token && { Authorization: `Bearer ${this.token}` }),
+        ...(this.username && { 'X-Username': this.username }),
         ...options.headers,
       },
       ...options,
@@ -85,26 +144,56 @@ class APIClient {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new APIError(data.error);
+        throw new ChatAPIError(data.error);
       }
       
       return data;
     } catch (error) {
-      if (error instanceof APIError) throw error;
-      throw new APIError({ message: 'Network error occurred' });
+      if (error instanceof ChatAPIError) throw error;
+      throw new ChatAPIError({ message: 'Chat service unavailable' });
     }
   }
   
-  // Specific API methods
-  async getPosts() {
-    return this.request('/posts');
+  // Chat-specific API methods
+  async loginOrCreate(username) {
+    return this.request('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username }),
+    });
   }
   
-  async createPost(postData) {
-    return this.request('/posts', {
+  async getConversations() {
+    return this.request('/conversations');
+  }
+  
+  async sendMessage(messageData) {
+    return this.request('/messages', {
       method: 'POST',
-      body: JSON.stringify(postData),
+      body: JSON.stringify(messageData),
     });
+  }
+  
+  async transformMessageTone(messageId, tone) {
+    return this.request(`/messages/${messageId}/transform`, {
+      method: 'PUT',
+      body: JSON.stringify({ tone }),
+    });
+  }
+  
+  // WebSocket connection for real-time chat
+  connectToChat(conversationId, onMessage) {
+    const wsUrl = `ws://localhost:3001/chat/${conversationId}`;
+    this.ws = new WebSocket(wsUrl);
+    
+    this.ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      onMessage(message);
+    };
+    
+    return {
+      disconnect: () => this.ws?.close(),
+      send: (message) => this.ws?.send(JSON.stringify(message))
+    };
   }
 }
 ```
@@ -317,27 +406,36 @@ module.exports = authMiddleware;
 
 ### Data Storage Implementation
 ```javascript
-// models/Database.js - In-memory database singleton
-class InMemoryDatabase {
+// models/ChatDatabase.js - In-memory chat database singleton
+class InMemoryChatDatabase {
   constructor() {
     this.users = new Map();
-    this.posts = new Map();
-    this.comments = new Map();
-    this.follows = new Map();
+    this.conversations = new Map();
+    this.messages = new Map();
+    this.toneTransformations = new Map();
     
     // Auto-incrementing IDs
     this.nextUserId = 1;
-    this.nextPostId = 1;
-    this.nextCommentId = 1;
+    this.nextConversationId = 1;
+    this.nextMessageId = 1;
+    
+    // Available tone options
+    this.availableTones = ['normal', 'funny', 'playful', 'serious', 'formal', 'casual'];
   }
   
-  // User operations
-  createUser(userData) {
+  // User operations (username-only authentication)
+  createOrFindUser(username) {
+    const existingUser = this.findUserByUsername(username);
+    if (existingUser) return existingUser;
+    
     const user = {
       id: this.nextUserId++,
-      ...userData,
+      username,
+      displayName: username,
+      profileImage: null,
+      defaultTone: 'normal',
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      lastSeen: new Date().toISOString()
     };
     
     this.users.set(user.id, user);
@@ -348,25 +446,91 @@ class InMemoryDatabase {
     return this.users.get(parseInt(id));
   }
   
-  findUserByEmail(email) {
-    return Array.from(this.users.values()).find(user => user.email === email);
+  findUserByUsername(username) {
+    return Array.from(this.users.values()).find(user => user.username === username);
   }
   
-  // Post operations
-  createPost(postData) {
-    const post = {
-      id: this.nextPostId++,
-      ...postData,
+  getAllUsers() {
+    return Array.from(this.users.values());
+  }
+  
+  // Conversation operations
+  createConversation(participantIds) {
+    const conversation = {
+      id: this.nextConversationId++,
+      participants: participantIds,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      lastMessageAt: new Date().toISOString(),
+      lastMessage: null
     };
     
-    this.posts.set(post.id, post);
-    return post;
+    this.conversations.set(conversation.id, conversation);
+    return conversation;
   }
   
-  findPostsByUserId(userId) {
-    return Array.from(this.posts.values()).filter(post => post.userId === userId);
+  findConversationsByUserId(userId) {
+    return Array.from(this.conversations.values()).filter(conv => 
+      conv.participants.includes(userId)
+    );
+  }
+  
+  // Message operations
+  createMessage(messageData) {
+    const message = {
+      id: this.nextMessageId++,
+      conversationId: messageData.conversationId,
+      senderId: messageData.senderId,
+      originalContent: messageData.content,
+      transformedContent: null,
+      selectedTone: messageData.tone || 'normal',
+      deliveredAt: null,
+      readAt: null,
+      createdAt: new Date().toISOString()
+    };
+    
+    this.messages.set(message.id, message);
+    
+    // Update conversation last message
+    const conversation = this.conversations.get(messageData.conversationId);
+    if (conversation) {
+      conversation.lastMessage = message;
+      conversation.lastMessageAt = message.createdAt;
+    }
+    
+    return message;
+  }
+  
+  findMessagesByConversationId(conversationId) {
+    return Array.from(this.messages.values())
+      .filter(msg => msg.conversationId === conversationId)
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  }
+  
+  // Tone transformation operations
+  transformMessageTone(messageId, tone) {
+    const message = this.messages.get(parseInt(messageId));
+    if (!message) return null;
+    
+    // Simulate tone transformation (in real app, this would use AI/ML service)
+    const transformedContent = this.applyToneTransformation(message.originalContent, tone);
+    
+    message.transformedContent = transformedContent;
+    message.selectedTone = tone;
+    
+    return message;
+  }
+  
+  applyToneTransformation(content, tone) {
+    // Mock tone transformation - in real implementation, use AI service
+    const toneMap = {
+      'funny': `😄 ${content} (but funnier!)`,
+      'playful': `😉 ${content} ~playful vibes~`,
+      'serious': `${content}.`, // More formal punctuation
+      'formal': `I would like to convey that ${content.toLowerCase()}.`,
+      'casual': `hey! ${content.toLowerCase()} 😊`
+    };
+    
+    return toneMap[tone] || content;
   }
   
   getAllPosts() {
@@ -460,22 +624,32 @@ module.exports = postsService;
 
 ## API Design Guidelines
 
-### RESTful Endpoint Patterns
+### Chat API Endpoint Patterns
 ```
-GET    /api/posts           # Get all posts
-POST   /api/posts           # Create new post
-GET    /api/posts/:id       # Get specific post
-PUT    /api/posts/:id       # Update specific post
-DELETE /api/posts/:id       # Delete specific post
+# User Management (Username-only auth)
+POST   /api/auth/login         # Login with username (creates profile if new)
+GET    /api/users              # Get all users (for user discovery)
+GET    /api/users/:username    # Get user profile by username
+PUT    /api/users/:username    # Update user profile
 
-GET    /api/users/:id       # Get user profile
-PUT    /api/users/:id       # Update user profile
-GET    /api/users/:id/posts # Get user's posts
+# Conversations
+GET    /api/conversations      # Get user's conversations
+POST   /api/conversations      # Create new conversation
+GET    /api/conversations/:id  # Get specific conversation details
 
-POST   /api/auth/login      # User login
-POST   /api/auth/register   # User registration
-POST   /api/auth/logout     # User logout
-GET    /api/auth/verify     # Verify token
+# Messages
+GET    /api/conversations/:id/messages  # Get messages for conversation
+POST   /api/messages                    # Send new message
+PUT    /api/messages/:id/tone          # Transform message tone
+DELETE /api/messages/:id               # Delete message (if allowed)
+
+# Tone Management
+GET    /api/tones                      # Get available tone options
+GET    /api/users/:username/preferences # Get user's tone preferences
+PUT    /api/users/:username/preferences # Update user's tone preferences
+
+# WebSocket Endpoints
+WS     /chat/:conversationId           # Real-time chat connection
 ```
 
 ### Response Format Standards

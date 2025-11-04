@@ -23,6 +23,7 @@ Mimic whatsapp look and feel
 
 ## Feature Workflow
 * Input user story
+* Generate the spec
 * Generate a plan.  Ask me questions if anything is not clear or you need more context or detail
 * Give feedback on the plan in a loop
 * Solidify on the final plan

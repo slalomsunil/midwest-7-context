@@ -1,92 +1,100 @@
 # Full-Stack Development Guide
 
-## Cross-Layer Feature Development Workflow
+## Chat Tool Feature Development Workflow
 
-### 1. Feature Analysis and Planning
-**Before starting any feature implementation:**
-- Identify which layers (UI, Service, or both) need changes
-- Define the data flow between UI and Service
-- Check for existing Service APIs that meet the requirement
-- Plan the user experience and API contract
+### 1. User Story Analysis and Planning
+**Before starting any chat feature implementation:**
+- Input user story for chat functionality (messaging, tone selection, user profiles)
+- Generate detailed specifications for the feature
+- Create implementation plan with clear API contracts
+- Identify which layers (UI, Service, or both) need changes for chat functionality
+- Plan WhatsApp-style user experience and message flow
 
 ### 2. Service-First Development Pattern
-**When building features that require new backend functionality:**
-1. **Design the API contract** - Define request/response structures
-2. **Implement Service endpoint** - Build backend functionality first
-3. **Test Service endpoint** - Verify backend works independently
-4. **Implement UI integration** - Build frontend to consume the API
-5. **End-to-end testing** - Validate complete feature functionality
+**When building chat features that require new backend functionality:**
+1. **Design the messaging API contract** - Define message, user, and tone transformation structures
+2. **Implement Service endpoints** - Build messaging, user management, and tone processing first
+3. **Generate and run unit tests** - Verify backend messaging logic works independently
+4. **Generate and run integration tests** - Test complete messaging workflows
+5. **Implement WhatsApp-style UI** - Build chat interface to consume messaging APIs
+6. **Update Swagger documentation** - Document all API creates/updates for messaging
+7. **End-to-end testing** - Validate complete chat functionality with tone modification
 
-### 3. UI Enhancement Pattern
-**When building features that only require UI changes:**
-1. **Verify existing APIs** - Confirm Service provides needed data
-2. **Implement UI components** - Build new interface elements
-3. **Integrate with Service** - Connect UI to existing endpoints
-4. **Test user experience** - Validate UI behavior and error handling
+### 3. Chat UI Enhancement Pattern
+**When building chat features that only require UI changes:**
+1. **Verify existing messaging APIs** - Confirm Service provides needed chat data
+2. **Implement WhatsApp-style components** - Build new chat interface elements
+3. **Integrate with messaging Service** - Connect UI to existing chat endpoints
+4. **Test chat user experience** - Validate messaging behavior and tone selection
+5. **Ensure real-time functionality** - Test live chat and message delivery
 
 ## Full-Stack Feature Implementation Templates
 
-### Template: User Authentication Feature
+### Template: Username-Only Authentication Feature
 ```
 1. Service Layer:
-   - POST /auth/login - Accept credentials, return JWT token
-   - POST /auth/register - Create new user account
-   - GET /auth/verify - Validate JWT token
-   - Implement password hashing and JWT generation
+   - POST /auth/login - Accept username, create profile if not exists
+   - GET /users/:username - Get user profile by username
+   - PUT /users/:username - Update user profile
+   - No password validation (username-only authentication)
 
 2. UI Layer:
-   - Login form component with validation
-   - Registration form component
-   - Authentication context/state management
-   - Protected route components
-   - Token storage and management
+   - Simple username input component
+   - User profile creation/display
+   - WhatsApp-style user management
+   - Session management without tokens
+   - User discovery and search
 
 3. Integration:
-   - API client with token attachment
-   - Error handling for auth failures
-   - Redirect logic after login/logout
+   - Simple username-based authentication
+   - Automatic profile creation for new users
+   - Error handling for username conflicts
+   - User session management
 ```
 
-### Template: Social Media Post Feature
+### Template: Chat Messaging Feature
 ```
 1. Service Layer:
-   - POST /posts - Create new post
-   - GET /posts - Retrieve posts feed
-   - GET /posts/:id - Get specific post
-   - DELETE /posts/:id - Delete user's post
-   - In-memory storage with user associations
+   - POST /conversations - Create new conversation
+   - GET /conversations - Get user's conversations
+   - POST /messages - Send message with tone selection
+   - GET /conversations/:id/messages - Retrieve conversation messages
+   - PUT /messages/:id/tone - Apply tone transformation to message
+   - WebSocket support for real-time messaging
 
 2. UI Layer:
-   - Post creation form component
-   - Posts feed display component
-   - Individual post component
-   - Post actions (like, delete, edit)
-   - Real-time feed updates
+   - WhatsApp-style conversation list
+   - Chat interface with message bubbles
+   - Tone selector component (funny, playful, serious)
+   - Message input with real-time typing indicators
+   - Message delivery status indicators
 
 3. Integration:
-   - API calls with proper error handling
-   - Optimistic UI updates
-   - Loading states for all operations
+   - Real-time message delivery via WebSockets
+   - Tone transformation with loading states
+   - Error handling for message failures
+   - Optimistic UI updates for sent messages
 ```
 
-### Template: User Profile Feature
+### Template: Tone Transformation Feature
 ```
 1. Service Layer:
-   - GET /users/:id - Get user profile data
-   - PUT /users/:id - Update user profile
-   - GET /users/:id/posts - Get user's posts
-   - File upload handling for profile images
+   - POST /messages/:id/transform - Transform message with selected tone
+   - GET /tones - Get available tone options (funny, playful, serious)
+   - PUT /users/:id/preferences - Save user's default tone preferences
+   - AI/ML integration for tone transformation logic
 
 2. UI Layer:
-   - Profile display component
-   - Profile edit form component
-   - User posts display
-   - Profile image upload component
+   - Tone selection dropdown/picker component
+   - Message preview with tone transformation
+   - Tone preference settings in user profile
+   - Visual indicators for tone-modified messages
 
 3. Integration:
-   - Form validation matching Service requirements
-   - Image upload with progress indicators
-   - Profile caching and updates
+   - Real-time tone transformation preview
+   - Error handling for transformation failures
+   - Caching of transformed messages
+   - User preference persistence
 ```
 
 ## Cross-Repository Coordination Patterns

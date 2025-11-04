@@ -7,7 +7,7 @@
 # GitHub Copilot Instructions - AI Instruction Orchestration Hub
 
 ## Project Context
-This is a React/Node.js social media POC with cross-repository coordination requirements.
+This is a React/Node.js chat tool with tone modification capabilities and cross-repository coordination requirements.
 
 ## Core AI Behavior Rules
 
@@ -78,8 +78,15 @@ For full-stack development workflows, see: docs/development-guide.md
 
 ## Context Organization
 
-This repository serves as a centralized AI instruction hub for coordinating development across:
-- UI Repository: React-based frontend (slalomsunil/midwest-7-ui)
-- Service Repository: Node.js-based backend (slalomsunil/midwest-7-service)
+This repository serves as a centralized AI instruction hub for coordinating chat tool development across:
+- UI Repository: React-based WhatsApp-style chat frontend (slalomsunil/midwest-7-ui)
+- Service Repository: Node.js-based chat backend with tone transformation (slalomsunil/midwest-7-service)
+
+Key chat tool features:
+- Username-only authentication (no passwords)
+- WhatsApp-style chat interface
+- Message tone transformation (funny, playful, serious)
+- Real-time messaging capabilities
+- User discovery and profile management
 
 All detailed project information is organized in the docs/ directory to maintain clear separation between behavioral rules (this file) and project-specific documentation.
