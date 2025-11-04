@@ -90,3 +90,9 @@ Key chat tool features:
 - User discovery and profile management
 
 All detailed project information is organized in the docs/ directory to maintain clear separation between behavioral rules (this file) and project-specific documentation.
+
+
+## Storied work
+Stories are stored under the `stories` directory.  There are three sub-directories that hold stories in various states.  New stories that have not been worked yet live in `todo`.  The current story being worked on is under `current`.  There will be a directory for under `current` to hold all files related to a given story, including the plan and spec.  Once the story is complete, the story directory is moved to the `archive` directory.
+Ignore files under `stories/todo` and `stories/complete`
+
