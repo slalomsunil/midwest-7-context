@@ -12,7 +12,7 @@ If not provided, ask the user for the story number and feature name
 
 ## Step 2: Create File Structure
 - Create folder in `stories/current/[story-number]-[feature-name]`
-- Create story.md, technical.md files using templates in the `templates` directory and ask the user to provide content for each.
+- copy story.md, technical.md files from `templates` directory and ask the user to provide content for each.
 - Get confirmation from the user before proceeding.
 - Once user confirms, create the spec.md with the specs using the story.md and technical.md content.
 - Ask user the review the specs and confirm before proceeding.
