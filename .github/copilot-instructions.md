@@ -59,6 +59,19 @@ This is a React/Node.js chat tool with tone modification capabilities and cross-
 - Provide progress updates for multi-step implementations
 - Summarize what was accomplished at the end of each session
 
+### Architecture Diagram Maintenance
+- **ALWAYS review architecture diagrams** when a story is completed
+- Check if changes impact any of the C4 levels (System Context, Container, Component, Code)
+- **REQUIRED**: Get user confirmation before updating architecture diagrams
+- Update relevant C4 diagram files if:
+  - New containers or components are added
+  - External system integrations change
+  - Communication patterns or protocols change
+  - Deployment architecture changes
+- Keep diagrams synchronized across all three repositories (context, service, ui)
+- Ensure Mermaid syntax remains valid after updates
+- Reference the C4 model hierarchy: C1 (System Context) → C2 (Container) → C3 (Component) → C4 (Code)
+
 ### Code Quality Standards
 - Follow established patterns and conventions found in the codebase
 - Prioritize readability and maintainability over brevity
