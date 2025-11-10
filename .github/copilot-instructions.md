@@ -9,6 +9,14 @@
 ## CRITICAL: Test-Driven Development (TDD) - ALWAYS REQUIRED
 **ALWAYS follow TDD unless the user explicitly asks to "fix tests" or "debug tests"**
 
+**MANDATORY**: Before implementing ANY feature or change, consult `docs/tdd-enforcement-checklist.md`
+
+### TDD Self-Check Before Coding:
+- [ ] Have I written a test that describes the expected behavior?
+- [ ] Have I run the test to confirm it fails?
+- [ ] Have I seen the specific failure message?
+- [ ] Only after ALL above are YES: Write implementation code
+
 ### For NEW Features:
 1. **FIRST**: Write failing tests that describe the expected behavior
 2. **SECOND**: Run tests to confirm they fail (Red)
@@ -18,6 +26,16 @@
 6. **SIXTH**: Fix any test failures caused by the new feature
 7. **NEVER**: Write implementation code before writing tests
 8. **NEVER**: Consider a feature complete with failing tests
+
+### For CHANGING Existing Features:
+1. **FIRST**: Write new test for desired behavior (should fail)
+2. **SECOND**: Run test to confirm it fails
+3. **THIRD**: Modify implementation to make new test pass
+4. **FOURTH**: Update/remove old tests that no longer apply
+5. **FIFTH**: Run ALL tests to ensure no regressions
+6. **SIXTH**: Remove obsolete implementation code
+7. **NEVER**: Modify implementation before writing new tests
+8. **NEVER**: Update tests to match implementation (tests drive code, not vice versa)
 
 ### For Bug Fixes:
 1. **FIRST**: Write a failing test that reproduces the bug

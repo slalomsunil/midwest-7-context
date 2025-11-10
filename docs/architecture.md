@@ -35,16 +35,18 @@ This is a **centralized AI instruction hub** that coordinates feature developmen
 ### UI Repository (React)
 - **Purpose**: Frontend user interface for chat tool with tone modification
 - **Framework**: React with modern JavaScript/TypeScript patterns
-- **Responsibilities**: Chat interface, tone selection, user profiles, message display
+- **Responsibilities**: Chat interface, tone selection, user profiles, message display, real-time notifications, visual notification indicators
+- **Real-time Features**: WebSocket client for live messaging, notification rendering, username blinking indicators, session state management
 - **Look & Feel**: WhatsApp-inspired design and user experience
-- **Dependencies on Service**: REST API endpoints for messaging, user management, and tone transformation
+- **Dependencies on Service**: REST API endpoints for messaging, user management, tone transformation, and WebSocket connections for real-time updates
 
 ### Service Repository (Node.js)
 - **Purpose**: Backend API service for chat tool with AI-powered tone modification
 - **Runtime**: Node.js with Express or similar framework
-- **Responsibilities**: Message processing, tone transformation, user management, chat persistence
+- **Responsibilities**: Message processing, tone transformation, user management, chat persistence, real-time notifications, session management
+- **Real-time Features**: WebSocket server for live messaging, notification broadcasting, online user tracking, session cleanup on restart
 - **Data Store**: In-memory database for POC purposes
-- **Dependencies**: Provides REST APIs consumed by UI, integrates with tone transformation services
+- **Dependencies**: Provides REST APIs consumed by UI, integrates with tone transformation services, manages WebSocket connections
 
 ### Context Repository (This Repository)
 - **Purpose**: Centralized AI instructions for coordinating cross-layer development
@@ -67,6 +69,9 @@ This is a **centralized AI instruction hub** that coordinates feature developmen
 - **Error Handling Patterns**: Consistent error handling for messaging failures and tone processing
 - **User Management Flow**: Coordinated username-only authentication and profile creation
 - **Message Flow**: Seamless message sending, tone transformation, and delivery coordination
+- **Real-time Coordination**: WebSocket event synchronization between UI and Service for notifications
+- **Session Management**: Coordinated session cleanup patterns for development and deployment scenarios
+- **Notification State**: Consistent notification handling across WebSocket connections and UI state
 
 ## In-Memory Database Architecture
 
@@ -87,6 +92,9 @@ This is a **centralized AI instruction hub** that coordinates feature developmen
 - **Response Patterns**: Consistent JSON response structures for messages, users, and conversations
 - **Real-time Considerations**: WebSocket support for live chat functionality
 - **Tone Processing**: Asynchronous tone transformation with status tracking
+- **WebSocket Events**: Standardized event patterns for notifications, session management, and message delivery
+- **Session Lifecycle**: Automatic session cleanup on service restart with proper client notification
+- **Notification Patterns**: Consistent notification event structure across different message types
 
 ## Development Coordination Guidelines
 
@@ -105,15 +113,24 @@ This is a **centralized AI instruction hub** that coordinates feature developmen
 - Ensure API calls match Service endpoint signatures for chat functionality
 - Handle loading states for message sending and tone processing
 - Implement WhatsApp-style UI patterns consistently
+- Manage WebSocket connections and implement notification rendering
+- Handle session cleanup and reconnection scenarios gracefully
+- Implement accessible notification patterns with proper ARIA labels
 
 **When working in Service repository**:
 - Consider chat UI requirements when designing messaging APIs
 - Provide comprehensive message and user data to minimize additional API calls
 - Include proper error messages for messaging failures and tone processing issues
 - Design endpoints for real-time chat functionality
+- Implement WebSocket event broadcasting for notifications and session management
+- Handle session cleanup on restart and deployment scenarios
+- Provide consistent notification event structures
 
 **When coordinating across repositories**:
 - Update this Context repository with new chat patterns discovered during development
 - Document messaging API contracts and tone transformation workflows
 - Share reusable chat components and messaging patterns between UI and Service teams
 - Maintain consistency in tone options and transformation logic
+- Coordinate WebSocket event naming and data structures between UI and Service
+- Document notification patterns and session management approaches
+- Ensure real-time features work consistently across development and deployment environments

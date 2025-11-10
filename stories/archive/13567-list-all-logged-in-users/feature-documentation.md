@@ -119,7 +119,7 @@ Currently logs user selection. Future stories will implement chat initiation:
 
 ```javascript
 const handleUserClick = (selectedUser) => {
-  console.log('User clicked:', selectedUser);
+  
   // Future: Initiate chat with selected user
 };
 ```

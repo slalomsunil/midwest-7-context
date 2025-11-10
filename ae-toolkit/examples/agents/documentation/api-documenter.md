@@ -124,10 +124,10 @@ const response = await fetch('https://api.example.com/users', {
 
 if (response.ok) {
   const user = await response.json();
-  console.log('Created user:', user.id);
+  
 } else {
   const error = await response.json();
-  console.error('Failed:', error.message);
+ 
 }
 ```
 

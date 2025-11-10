@@ -1,0 +1,158 @@
+/* Story 77777 - Visual Notification System CSS Guide */
+
+/* ============================================
+   HOW THE NOTIFICATION SYSTEM WORKS
+   ============================================
+
+   When "blue" sends you a message:
+
+   1. INITIAL STATE (0-3 seconds):
+      The "blue" row will have class: 
+      "user-item user-item--has-notification user-item--blinking"
+      
+      Effect:
+      - Background blinks between light green (#d1f4e0) and white
+      - Blinks 3 times (3 seconds total)
+      - Draws immediate attention to new message
+
+   2. PERSISTENT STATE (after 3 seconds):
+      The "blue" row will have class:
+      "user-item user-item--has-notification"
+      
+      Effect:
+      - Background stays solid light green (#d1f4e0)
+      - Clearly distinguishable from other users (sky, test)
+      - Stays until you click on blue
+
+   3. CLEARED STATE (after clicking):
+      The "blue" row will have class:
+      "user-item"
+      
+      Effect:
+      - Returns to normal white background
+      - Looks like other users again
+
+   ============================================
+   CSS CLASS BREAKDOWN
+   ============================================ */
+
+/* Base user item - Normal white background */
+.user-item {
+  background-color: #ffffff;
+  /* Other styles... */
+}
+
+/* User item when hovered - Light gray */
+.user-item:hover {
+  background-color: #f5f6f6;
+}
+
+/* User with unread messages - Light green (persistent) */
+.user-item--has-notification {
+  background-color: #d1f4e0 !important;
+}
+
+/* Hover state for user with notifications - Darker green */
+.user-item--has-notification:hover {
+  background-color: #c0f0d4 !important;
+}
+
+/* Blinking animation - Applied for first 3 seconds */
+.user-item--blinking {
+  animation: notificationBlink 1s ease-in-out 3;
+  /* Translation: Run "notificationBlink" animation
+     - Duration: 1 second per iteration
+     - Easing: ease-in-out (smooth)
+     - Iterations: 3 times (total 3 seconds) */
+}
+
+/* Animation keyframes - What happens during each blink */
+@keyframes notificationBlink {
+  0%, 100% {
+    /* Start and end with green */
+    background-color: #d1f4e0;
+  }
+  50% {
+    /* Middle of animation - white */
+    background-color: #ffffff;
+  }
+}
+
+/* ============================================
+   VISUAL TIMELINE EXAMPLE
+   ============================================
+
+   Time | Class Applied                        | Background Color | Effect
+   -----|--------------------------------------|------------------|------------------
+   0s   | user-item                            | white            | Normal
+   0s   | + user-item--has-notification        | light green      | New message!
+   0s   | + user-item--blinking               | (animating)      | Blink starts
+   0.0s |                                      | green            | Frame 1 start
+   0.5s |                                      | white            | Frame 1 middle
+   1.0s |                                      | green            | Frame 1 end
+   1.5s |                                      | white            | Frame 2 middle
+   2.0s |                                      | green            | Frame 2 end
+   2.5s |                                      | white            | Frame 3 middle
+   3.0s |                                      | green            | Animation ends
+   3.0s | - user-item--blinking removed        | green (solid)    | Stays green
+   ...  | user-item--has-notification          | green (solid)    | Until clicked
+   CLICK| - user-item--has-notification        | white            | Back to normal
+
+   ============================================
+   COMPARISON VIEW
+   ============================================
+
+   Before message from "blue":
+   ┌─────────────────────────────┐
+   │ Online Users            [3] │
+   ├─────────────────────────────┤
+   │ 🔵 blue      Active now    │ ← White background
+   │ 💙 sky       Active now    │ ← White background
+   │ 📝 test      Active now    │ ← White background
+   └─────────────────────────────┘
+
+   During blinking (0-3 seconds):
+   ┌─────────────────────────────┐
+   │ Online Users            [3] │
+   ├─────────────────────────────┤
+   │ 🔵 blue      Active now    │ ← Green ↔ White (blinking)
+   │ 💙 sky       Active now    │ ← White background
+   │ 📝 test      Active now    │ ← White background
+   └─────────────────────────────┘
+
+   After blinking (persistent):
+   ┌─────────────────────────────┐
+   │ Online Users            [3] │
+   ├─────────────────────────────┤
+   │ 🟢 blue      Active now    │ ← Light green background
+   │ 💙 sky       Active now    │ ← White background
+   │ 📝 test      Active now    │ ← White background
+   └─────────────────────────────┘
+
+   After clicking "blue":
+   ┌─────────────────────────────┐
+   │ Online Users            [3] │
+   ├─────────────────────────────┤
+   │ 🔵 blue      Active now    │ ← White background (cleared)
+   │ 💙 sky       Active now    │ ← White background
+   │ 📝 test      Active now    │ ← White background
+   └─────────────────────────────┘
+
+   ============================================
+   ACCESSIBILITY FEATURES
+   ============================================
+
+   For users with motion sensitivity:
+   @media (prefers-reduced-motion: reduce) {
+     .user-item--blinking {
+       animation: none;
+       background-color: #d1f4e0 !important;
+     }
+   }
+
+   Effect: No blinking animation, just solid green background
+   - Still get visual indication
+   - No jarring motion
+   - Comfortable for all users
+
+   ============================================ */
